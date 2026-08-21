@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Door Studio — Configurator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#f2ede2;
+    --ink-dim:#b8b0a0;
+    --bg-0:#141311;
+    --bg-1:#1c1a17;
+    --bg-2:#26231f;
+    --line:#3a362f;
+    --brass:#c9a24b;
+    --brass-hi:#e6c877;
+    --steel:#9aa0a6;
+    --shadow:rgba(0,0,0,0.55);
+    --radius-sm:10px;
+    --radius-md:16px;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0; padding:0; width:100%; height:100%;
+    background:var(--bg-0);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    overflow:hidden;
+    -webkit-tap-highlight-color:transparent;
+    user-select:none;
+  }
+
+  body{
+    background:
+      radial-gradient(ellipse 120% 60% at 50% 0%, rgba(201,162,75,0.08), transparent 60%),
+      repeating-linear-gradient(115deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px),
+      var(--bg-0);
+  }
+
+  .app{
+    height:100vh;
+    height:100dvh;
+    width:100vw;
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* ---------- Top bar ---------- */
+  .topbar{
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:18px 22px;
+    border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg, var(--bg-1), var(--bg-0));
+  }
+  .brand{
+    display:flex; align-items:baseline; gap:8px;
+    font-family:'Space Grotesk',sans-serif;
+  }
+  .brand .mark{
+    font-weight:700; font-size:19px; letter-spacing:0.02em; color:var(--ink);
+  }
+  .brand .mark span{ color:var(--brass); }
+  .brand .sub{
+    font-size:10.5px; letter-spacing:0.16em; text-transform:uppercase; color:var(--ink-dim);
+  }
+  .selection-tags{
+    display:flex; gap:10px;
+  }
+  .tag{
+    display:flex; flex-direction:column;
+    padding:6px 14px;
+    border:1px solid var(--line);
+    border-radius:999px;
+    background:var(--bg-2);
+    min-width:118px;
+  }
+  .tag .k{ font-size:9px; letter-spacing:0.14em; text-transform:uppercase; color:var(--ink-dim); }
+  .tag .v{ font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:600; color:var(--brass-hi); transition:opacity .15s ease; }
+
+  /* ---------- Handle strip (top, horizontal scroll) ---------- */
+  .handle-strip-wrap{
+    flex:0 0 auto;
+    border-bottom:1px solid var(--line);
+    background:var(--bg-1);
+    padding:14px 0 16px;
+  }
+  .strip-label{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:10px; letter-spacing:0.18em; text-transform:uppercase;
+    color:var(--ink-dim);
+    padding:0 22px 10px;
+  }
+  .handle-strip{
+    display:flex;
+    gap:14px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    padding:2px 22px 6px;
+    scroll-snap-type:x proximity;
+    scrollbar-width:thin;
+    scrollbar-color:var(--line) transparent;
+  }
+  .handle-strip::-webkit-scrollbar{ height:6px; }
+  .handle-strip::-webkit-scrollbar-thumb{ background:var(--line); border-radius:6px; }
+
+  .handle-card{
+    flex:0 0 auto;
+    scroll-snap-align:start;
+    width:104px;
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+    padding:12px 8px 10px;
+    border-radius:var(--radius-md);
+    border:1px solid var(--line);
+    background:linear-gradient(160deg,#2a2722,#201e1a);
+    cursor:pointer;
+    transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+  }
+  .handle-card:active{ transform:scale(0.96); }
+  .handle-card .plate{
+    width:64px; height:64px;
+    border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+    background:radial-gradient(circle at 32% 28%, #47433a, #1c1a16 72%);
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,0.04);
+  }
+  .handle-card .plate img{ width:36px; height:36px; filter:drop-shadow(0 2px 3px rgba(0,0,0,0.6)); }
+  .handle-card .name{
+    font-size:11px; text-align:center; color:var(--ink-dim);
+    line-height:1.25;
+    font-weight:500;
+  }
+  .handle-card.selected{
+    border-color:var(--brass);
+    box-shadow:0 0 0 1px var(--brass), 0 8px 18px -6px rgba(201,162,75,0.35);
+    background:linear-gradient(160deg,#332c1d,#221e17);
+  }
+  .handle-card.selected .name{ color:var(--brass-hi); }
+
+  /* ---------- Lower area ---------- */
+  .lower{
+    flex:1 1 auto;
+    display:flex;
+    min-height:0;
+  }
+
+  /* ---------- Laminate strip (left, vertical scroll) ---------- */
+  .laminate-col{
+    flex:0 0 34%;
+    max-width:300px;
+    min-width:190px;
+    display:flex;
+    border-right:1px solid var(--line);
+    background:var(--bg-1);
+    min-height:0;
+  }
+  .laminate-tab{
+    flex:0 0 30px;
+    display:flex; align-items:center; justify-content:center;
+    border-right:1px solid var(--line);
+    background:var(--bg-2);
+  }
+  .laminate-tab span{
+    writing-mode:vertical-rl;
+    transform:rotate(180deg);
+    font-family:'Space Grotesk',sans-serif;
+    font-size:10.5px;
+    letter-spacing:0.22em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+  }
+  .laminate-strip{
+    flex:1 1 auto;
+    overflow-y:auto;
+    overflow-x:hidden;
+    padding:14px 12px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    scroll-snap-type:y proximity;
+    scrollbar-width:thin;
+    scrollbar-color:var(--line) transparent;
+    min-height:0;
+  }
+  .laminate-strip::-webkit-scrollbar{ width:6px; }
+  .laminate-strip::-webkit-scrollbar-thumb{ background:var(--line); border-radius:6px; }
+
+  .laminate-card{
+    scroll-snap-align:start;
+    position:relative;
+    height:74px;
+    border-radius:var(--radius-sm);
+    overflow:hidden;
+    cursor:pointer;
+    border:1px solid var(--line);
+    flex:0 0 auto;
+    transition:transform .18s ease, box-shadow .18s ease;
+  }
+  .laminate-card:active{ transform:scale(0.97); }
+  .laminate-card img{
+    width:100%; height:100%; object-fit:cover;
+    display:block;
+    filter:saturate(1.02) contrast(1.03);
+  }
+  .laminate-card .label{
+    position:absolute; left:0; right:0; bottom:0;
+    padding:6px 10px 5px;
+    background:linear-gradient(0deg, rgba(0,0,0,0.78), transparent);
+    font-size:11px; font-weight:600; letter-spacing:0.01em;
+  }
+  .laminate-card .code{
+    position:absolute; top:6px; right:8px;
+    font-size:9px; letter-spacing:0.08em;
+    color:rgba(255,255,255,0.75);
+    background:rgba(0,0,0,0.4);
+    padding:2px 6px; border-radius:20px;
+  }
+  .laminate-card.selected{
+    border-color:var(--brass);
+    box-shadow:0 0 0 2px var(--brass), 0 10px 20px -8px rgba(0,0,0,0.7);
+  }
+  .laminate-card.selected .label{ color:var(--brass-hi); }
+
+  /* ---------- Door stage (right) ---------- */
+  .door-stage{
+    flex:1 1 auto;
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:0;
+    background:
+      radial-gradient(ellipse 70% 55% at 50% 38%, rgba(255,235,190,0.07), transparent 65%),
+      var(--bg-0);
+  }
+
+  .door-wrap{
+    position:relative;
+    height:82%;
+    aspect-ratio:0.5/1;
+    max-width:88%;
+    perspective:1400px;
+    animation:riseIn .7s cubic-bezier(.2,.8,.2,1) both;
+  }
+  @keyframes riseIn{
+    from{ opacity:0; transform:translateY(18px) scale(0.98); }
+    to{ opacity:1; transform:translateY(0) scale(1); }
+  }
+
+  .door-floor-shadow{
+    position:absolute;
+    left:8%; right:2%; bottom:-4%;
+    height:22px;
+    background:radial-gradient(ellipse, rgba(0,0,0,0.65), transparent 72%);
+    filter:blur(2px);
+  }
+
+  .door-frame{
+    position:absolute; inset:-14px -10px -6px -14px;
+    border-radius:6px;
+    background:linear-gradient(100deg,#0e0d0b,#221f1a 40%,#0e0d0b);
+    box-shadow:0 25px 50px -18px rgba(0,0,0,0.75);
+    transform:rotateY(-4deg);
+    transform-style:preserve-3d;
+  }
+
+  .door{
+    position:absolute; inset:0;
+    border-radius:3px;
+    overflow:hidden;
+    background-size:cover;
+    background-position:center;
+    box-shadow:
+      inset 0 0 0 10px rgba(0,0,0,0.18),
+      inset 0 0 40px rgba(0,0,0,0.25);
+    transition:background-image .35s ease;
+  }
+  .door .panel-lines{
+    position:absolute; inset:9%;
+    border:2px solid rgba(0,0,0,0.28);
+    border-radius:2px;
+    box-shadow:inset 0 0 0 6px rgba(255,255,255,0.03);
+  }
+  .door .panel-lines::before{
+    content:"";
+    position:absolute; inset:38% 6% auto 6%;
+    border-top:2px solid rgba(0,0,0,0.22);
+  }
+  .door .sheen{
+    position:absolute; inset:0;
+    background:linear-gradient(115deg, rgba(255,255,255,0.22), rgba(255,255,255,0) 30%, rgba(0,0,0,0.12) 70%, rgba(0,0,0,0.28));
+    mix-blend-mode:overlay;
+    pointer-events:none;
+  }
+
+  .door-edge{
+    position:absolute; top:0; right:-9px; bottom:0; width:9px;
+    background:linear-gradient(90deg, rgba(0,0,0,0.55), rgba(0,0,0,0.15));
+    transform:skewY(0deg);
+  }
+
+  .handle-mount{
+    position:absolute;
+    right:6%;
+    top:46%;
+    width:15%;
+    aspect-ratio:1/1;
+    max-width:54px;
+    border-radius:8px;
+    display:flex; align-items:center; justify-content:center;
+    background:radial-gradient(circle at 34% 30%, #d9bd7e, #8a6c2e 75%);
+    box-shadow:0 6px 14px -4px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.25);
+  }
+  .handle-mount img{
+    width:62%; height:62%;
+    filter:drop-shadow(0 2px 2px rgba(0,0,0,0.5)) brightness(0) invert(1);
+    transition:opacity .2s ease;
+  }
+
+  .door-caption{
+    position:absolute;
+    left:50%; bottom:-9%;
+    transform:translateX(-50%);
+    text-align:center;
+    font-family:'Space Grotesk',sans-serif;
+    font-size:12px;
+    color:var(--ink-dim);
+    letter-spacing:0.02em;
+    white-space:nowrap;
+  }
+  .door-caption b{ color:var(--ink); font-weight:600; }
+
+  @media (prefers-reduced-motion:reduce){
+    .door-wrap{ animation:none; }
+    .handle-card, .laminate-card, .door{ transition:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="mark">DOOR<span>STUDIO</span></span>
+      <span class="sub">Configurator</span>
+    </div>
+    <div class="selection-tags">
+      <div class="tag"><span class="k">Laminate</span><span class="v" id="tagLaminate">—</span></div>
+      <div class="tag"><span class="k">Hardware</span><span class="v" id="tagHandle">—</span></div>
+    </div>
+  </header>
+
+  <div class="handle-strip-wrap">
+    <div class="strip-label">Door Handles &amp; Hardware — swipe to browse</div>
+    <div class="handle-strip" id="handleStrip"></div>
+  </div>
+
+  <div class="lower">
+    <div class="laminate-col">
+      <div class="laminate-tab"><span>Laminates</span></div>
+      <div class="laminate-strip" id="laminateStrip"></div>
+    </div>
+
+    <div class="door-stage">
+      <div class="door-wrap">
+        <div class="door-floor-shadow"></div>
+        <div class="door-frame">
+          <div class="door" id="door">
+            <div class="panel-lines"></div>
+            <div class="sheen"></div>
+            <div class="handle-mount">
+              <img id="handleImg" src="" alt="handle">
+            </div>
+          </div>
+          <div class="door-edge"></div>
+        </div>
+        <div class="door-caption"><b id="capLaminate">—</b> &nbsp;·&nbsp; <span id="capHandle">—</span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ---------- Placeholder asset data ----------
+  // Icons: Iconify public API (Material Symbols set) — swap for real hardware photography later.
+  const ICON = (name) => `https://api.iconify.design/material-symbols/${name}.svg`;
+
+  const handles = [
+    { id:'h1', name:'Lever Handle',   icon: ICON('door-front') },
+    { id:'h2', name:'Round Knob',     icon: ICON('radio-button-unchecked') },
+    { id:'h3', name:'Pull Bar',       icon: ICON('drag-handle') },
+    { id:'h4', name:'Mortise Lock',   icon: ICON('lock') },
+    { id:'h5', name:'Digital Lock',   icon: ICON('password') },
+    { id:'h6', name:'Deadbolt',       icon: ICON('security') },
+    { id:'h7', name:'Door Chain',     icon: ICON('link') },
+    { id:'h8', name:'Hinge Set',      icon: ICON('sync-alt') },
+  ];
+
+  // Laminates: LoremFlickr keyword photography — swap for real swatch scans later.
+  const LAM = (kw, lock) => `https://loremflickr.com/480/300/${kw}/all?lock=${lock}`;
+
+  const laminates = [
+    { id:'l1', name:'Classic Oak',    code:'L-01', img: LAM('oak,wood', 11) },
+    { id:'l2', name:'Walnut Brown',   code:'L-02', img: LAM('walnut,wood', 22) },
+    { id:'l3', name:'Ash Grey',       code:'L-03', img: LAM('grey,wood,plank', 33) },
+    { id:'l4', name:'Matte Black',    code:'L-04', img: LAM('black,wood,texture', 44) },
+    { id:'l5', name:'Glossy White',   code:'L-05', img: LAM('white,wood,texture', 55) },
+    { id:'l6', name:'Teak Natural',   code:'L-06', img: LAM('teak,wood', 66) },
+    { id:'l7', name:'Concrete Grey',  code:'L-07', img: LAM('concrete,texture', 77) },
+    { id:'l8', name:'Marble White',   code:'L-08', img: LAM('marble,texture', 88) },
+    { id:'l9', name:'Espresso',       code:'L-09', img: LAM('dark,wood,plank', 99) },
+  ];
+
+  const state = { laminateId: laminates[0].id, handleId: handles[0].id };
+
+  const handleStripEl = document.getElementById('handleStrip');
+  const laminateStripEl = document.getElementById('laminateStrip');
+  const doorEl = document.getElementById('door');
+  const handleImgEl = document.getElementById('handleImg');
+  const tagLaminate = document.getElementById('tagLaminate');
+  const tagHandle = document.getElementById('tagHandle');
+  const capLaminate = document.getElementById('capLaminate');
+  const capHandle = document.getElementById('capHandle');
+
+  function renderHandles(){
+    handleStripEl.innerHTML = handles.map(h => `
+      <div class="handle-card ${h.id===state.handleId?'selected':''}" data-id="${h.id}">
+        <div class="plate"><img src="${h.icon}" alt="${h.name}"></div>
+        <div class="name">${h.name}</div>
+      </div>
+    `).join('');
+    handleStripEl.querySelectorAll('.handle-card').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        state.handleId = el.dataset.id;
+        renderHandles();
+        updateDoor();
+      });
+    });
+  }
+
+  function renderLaminates(){
+    laminateStripEl.innerHTML = laminates.map(l => `
+      <div class="laminate-card ${l.id===state.laminateId?'selected':''}" data-id="${l.id}">
+        <img src="${l.img}" alt="${l.name}">
+        <span class="code">${l.code}</span>
+        <div class="label">${l.name}</div>
+      </div>
+    `).join('');
+    laminateStripEl.querySelectorAll('.laminate-card').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        state.laminateId = el.dataset.id;
+        renderLaminates();
+        updateDoor();
+      });
+    });
+  }
+
+  function updateDoor(){
+    const lam = laminates.find(l=>l.id===state.laminateId);
+    const han = handles.find(h=>h.id===state.handleId);
+
+    doorEl.style.backgroundImage = `url('${lam.img}')`;
+    handleImgEl.src = han.icon;
+
+    tagLaminate.style.opacity = 0; tagHandle.style.opacity = 0;
+    capLaminate.textContent = lam.name;
+    capHandle.textContent = han.name;
+    requestAnimationFrame(()=>{
+      tagLaminate.textContent = lam.name;
+      tagHandle.textContent = han.name;
+      tagLaminate.style.opacity = 1; tagHandle.style.opacity = 1;
+    });
+  }
+
+  renderHandles();
+  renderLaminates();
+  updateDoor();
+</script>
+
+</body>
+</html>
