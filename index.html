@@ -230,10 +230,10 @@
     border-radius:14px;
     overflow:hidden;
     display:flex; align-items:center; justify-content:center;
-    background:
+    /* background:
       linear-gradient(100deg, rgba(255,255,255,0.10), rgba(0,0,0,0.05) 40%, rgba(0,0,0,0.22)),
       linear-gradient(180deg,#8a7248,#6b5732);
-    box-shadow:0 6px 14px -4px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,235,190,0.18);
+    box-shadow:0 6px 14px -4px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,235,190,0.18); */
   }
   .handle-mount img{
     width:66%; height:88%; object-fit:contain;
@@ -260,8 +260,8 @@
 
   <header class="topbar">
     <div class="brand">
-      <span class="mark">DOOR<span>STUDIO</span></span>
-      <span class="sub">Configurator</span>
+      <span class="mark">DOOR <span>STUDIO</span></span>
+      <!-- <span class="sub">Configurator</span> -->
     </div>
     <div class="selection-tags">
       <div class="tag"><span class="k">Laminate</span><span class="v" id="tagLaminate">—</span></div>
@@ -270,7 +270,7 @@
   </header>
 
   <div class="handle-strip-wrap">
-    <div class="strip-label">Door Handles &amp; Hardware — swipe to browse</div>
+    <div class="strip-label">Door Handles &amp; Hardware<!--  — swipe to browse --></div>
     <div class="handle-strip" id="handleStrip"></div>
   </div>
 
@@ -287,9 +287,9 @@
           <div class="stud tl"></div><div class="stud tr"></div>
           <div class="stud bl"></div><div class="stud br"></div>
           <div class="door" id="door">
-            <div class="panel-top"></div>
+            <!-- <div class="panel-top"></div>
             <div class="center-bar"></div>
-            <div class="panel-bottom"></div>
+            <div class="panel-bottom"></div> -->
             <div class="medallion"><img src="Assets/decor/medallion.png" alt=""></div>
             <div class="sheen"></div>
             <div class="handle-mount">
@@ -298,7 +298,7 @@
           </div>
           <div class="door-edge"></div>
         </div>
-        <div class="door-caption"><b id="capLaminate">—</b> &nbsp;·&nbsp; <span id="capHandle">—</span></div>
+        <div class="door-caption" style="display: none;"><b id="capLaminate">—</b> &nbsp;·&nbsp; <span id="capHandle">—</span></div>
       </div>
     </div>
   </div>
